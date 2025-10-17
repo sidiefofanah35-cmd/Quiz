@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Quiz Competition — ARK OF HOPE MODERN ACADEMY</title>
+<style>
+  :root{
+    --dark-blue:#022f6f;
+    --brand-blue:#0b47ed;
+    --soft-blue:#eaf2ff;
+    --card:#ffffff;
+    --muted:#f6f8fb;
+    --accent:#ff8a00;
+    --sidebar-width:300px;
+  }
+  *{box-sizing:border-box;font-family:Inter,system-ui,Arial,sans-serif}
+  body{margin:0;background:linear-gradient(180deg,#fbfdff,#ffffff);color:#123;min-height:100vh;display:flex;flex-direction:column}
+  header{background:var(--dark-blue);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 6px 24px rgba(2,47,111,0.18);position:relative;z-index:20}
+  header img{width:76px;height:76px;object-fit:contain;border-radius:10px;background:white;padding:6px;border:3px solid rgba(255,255,255,0.06)}
+  #menuBtn{font-size:26px;font-weight:900;background:none;border:0;color:white;cursor:pointer;margin-right:6px}
+  .header-text{display:flex;flex-direction:column}
+  .school-name{font-weight:900;font-size:20px;color:white}
+  .motto{font-size:13px;color:rgba(255,255,255,0.95);margin-top:2px;font-weight:600}
+  .below-header-title{text-align:center;background:linear-gradient(90deg,#eef6ff,#ffffff);padding:12px 18px;border-bottom:1px solid rgba(11,71,237,0.06)}
+  .below-header-title h2{margin:0;color:var(--dark-blue);font-size:18px;letter-spacing:0.3px}
+  .below-header-title p{margin:6px 0 0;color:#3b5b9b;font-size:13px}
+  main{display:flex;gap:18px;padding:18px;flex:1;align-items:flex-start}
+  /* Sidebar */
+  aside.sidebar{width:var(--sidebar-width);background:var(--card);padding:12px;border-radius:12px;box-shadow:0 10px 30px rgba(12,40,80,0.06);height:calc(100vh - 180px);overflow:auto;border:1px solid rgba(11,71,237,0.04)}
+  .class-title{font-weight:900;color:var(--brand-blue);margin:6px 0 10px;font-size:14px}
+  .student{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;cursor:pointer;margin-bottom:8px;transition:all .14s;border:1px solid transparent}
+  .student:hover{background:var(--soft-blue);transform:translateY(-2px)}
+  .student.selected{background:linear-gradient(90deg,#eef4ff,white);border-color:#d9e6ff;box-shadow:inset 0 0 0 1px rgba(11,71,237,0.03)}
+  .left{display:flex;gap:12px;align-items:center}
+  .avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--brand-blue),var(--dark-blue));color:white;display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 6px 18px rgba(11,71,237,0.08)}
+  .counts{font-size:13px;color:#333;display:flex;gap:8px;align-items:center}
+  .counts span{background:#f3f6fb;padding:6px 9px;border-radius:8px;font-weight:800;border:1px solid rgba(11,71,237,0.04)}
+  /* Workspace */
+  section.workspace{flex:1;display:flex;flex-direction:column;gap:14px}
+  .panel{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(12,40,80,0.05)}
+  .controls{display:flex;gap:12px;align-items:center}
+  input[type="number"]{padding:11px;border-radius:10px;border:1px solid #d8e6ff;width:160px;font-weight:700}
+  .question-area{display:flex;gap:14px}
+  .question-box{flex:1;min-height:180px;padding:14px;border-radius:14px;background:linear-gradient(180deg,#ffffff,#fbfdff);border:2px solid #eef5ff}
+  .qa-label{font-size:16px;color:#444;display:block;margin-bottom:6px;font-weight:800}
+  #questionText{white-space:pre-wrap;color:#111;font-size:15px;line-height:1.45}
+  .correct-answer{min-height:70px;padding:12px;border-radius:12px;background:linear-gradient(180deg,#f6fff7,#ffffff);border:2px solid #e6f6e8;margin-top:12px;font-weight:800}
+  .actions{display:flex;gap:10px;margin-top:12px}
+  button.btn{padding:10px 14px;border-radius:10px;border:0;font-weight:900;cursor:pointer;box-shadow:0 6px 18px rgba(9,30,80,0.06)}
+  button.correct{background:linear-gradient(90deg,#02c36a,#00b85a);color:white}
+  button.wrong{background:linear-gradient(90deg,#ff6b6b,#ff4c4c);color:white}
+  button.undo{background:linear-gradient(90deg,#eef2ff,#ffffff);color:var(--dark-blue);border:1px solid rgba(11,71,237,0.06)}
+  .badge{background:var(--brand-blue);color:white;padding:6px 10px;border-radius:8px;font-weight:800}
+  .right-column{width:360px;display:flex;flex-direction:column;gap:12px}
+  .live-panel{padding:12px;border-radius:12px;background:linear-gradient(180deg,#ffffff,#fbfdff);border:1px solid #eef5ff}
+  .live-panel .student-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(11,71,237,0.04)}
+  .note{font-size:13px;color:#666}
+  footer.results{margin-top:8px;background:transparent}
+  .summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+  .summary .card{background:white;padding:10px;border-radius:10px;min-width:170px;border:1px solid #f0f6ff;box-shadow:0 6px 18px rgba(13,36,86,0.03)}
+  /* hamburger responsive */
+  @media (max-width:1000px){
+    aside.sidebar{
+      position:fixed;
+      left:-380px;
+      top:0;
+      height:100vh;
+      z-index:60;
+      transition:left .28s ease;
+      overflow:auto;
+      width:320px;
+      padding-top:24px;
+    }
+    aside.sidebar.open{left:0}
+    #overlay{display:block}
+    .right-column{display:none}
+  }
+  @media (min-width:1001px){
+    #menuBtn{display:none}
+    aside.sidebar{position:static;height:calc(100vh - 220px)}
+  }
+  /* small niceties */
+  code{background:#f3f6fb;padding:2px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <button id="menuBtn" aria-label="Open students menu">☰</button>
+  <img id="logo" src="Schoollogo.jpg" alt="School logo (replace src with your uploaded file)">
+  <div class="header-text">
+    <div class="school-name">ARK OF HOPE MODERN ACADEMY</div>
+    <div class="motto">Excellence and Zeal</div>
+    <style>
+        .motto{
+            color: yellow;
+            font-size: 20px;
+        }
+    </style>
+  </div>
+</header>
+
+<div class="below-header-title">
+  <h2>Quiz Competition Between SSS 2 SCI. &amp; TECH. 1 and SSS 2 SCI. &amp; TECH. 2</h2>
+  <p style="margin:6px 0 0">Select a student from the left (or tap ☰), type a question number (1–200) and mark it.</p>
+</div>
+
+<main>
+  <aside class="sidebar" id="sidebar" aria-label="Students list">
+    <button id="closeMenu" class="closebtn" style="display:none;float:right;margin-right:12px;background:none;border:0;font-size:26px;color:var(--dark-blue);cursor:pointer">✖</button>
+
+    <div style="padding:6px 12px 10px 12px">
+      <div class="class-title">SSS 2 SCI. &amp; TECH. 1 (5 students)</div>
+      <div id="group-1"></div>
+
+      <div style="height:10px"></div>
+
+      <div class="class-title">SSS 2 SCI. &amp; TECH. 2 (3 students)</div>
+      <div id="group-2"></div>
+    </div>
+  </aside>
+
+  <section class="workspace">
+    <div class="panel">
+      <div class="controls">
+        <label for="qnum"><strong>Question #</strong></label>
+        <input id="qnum" type="number" min="1" max="200" placeholder="1 - 200">
+        <button id="loadQ" class="btn" style="background:linear-gradient(90deg,#e7f0ff,#ffffff);color:var(--brand-blue);border:1px solid rgba(11,71,237,0.06)">Load Question</button>
+
+        <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
+          <div class="note">Selected:</div>
+          <div class="badge" id="selectedName">None</div>
+        </div>
+      </div>
+
+      <div class="question-area" style="margin-top:12px">
+        <div class="question-box">
+          <div class="qa-label">Question</div>
+          <div id="questionText" style="min-height:80px;color:#111">Type a question number and click "Load Question".</div>
+
+          <div class="qa-label" style="margin-top:12px">Correct Answer</div>
+          <div id="correctAnswer" class="correct-answer">Correct answer will appear here.</div>
+
+          <div class="actions">
+            <button id="btnCorrect" class="btn correct">✅ Correct</button>
+            <button id="btnWrong" class="btn wrong">❌ Wrong</button>
+            <button id="btnUndo" class="btn undo">↺ Undo</button>
+          </div>
+        </div>
+
+        <div class="right-column">
+          <div class="panel live-panel">
+            <div style="font-weight:900;color:var(--brand-blue)">Live Results</div>
+            <div id="liveResults" style="margin-top:10px"></div>
+          </div>
+
+          <div class="panel live-panel">
+            <div style="font-weight:900;color:var(--brand-blue)">Controls & Notes</div>
+            <div style="margin-top:8px" class="note">
+              • Tap the <strong>☰</strong> button on smaller screens to open the student menu.<br>
+              • Click a student to select them. The sidebar will auto-close on mobile.<br>
+              • Use <strong>Undo</strong> to revert the last marking action.<br>
+              • Replace <code>Schoollogo.jpg</code> in the header with your real logo filename if needed.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="results">
+      <div class="panel">
+        <div style="font-weight:900;color:var(--brand-blue)">Summary</div>
+        <div class="summary" id="summaryCards" style="margin-top:10px"></div>
+      </div>
+    </footer>
+  </section>
+</main>
+
+<!-- lightweight overlay for mobile when sidebar opens -->
+<div id="overlay" style="display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.28);z-index:50"></div>
+
+<script>
+/* -------------------------
+   Student list (8 students)
+   ------------------------- */
+const students = [
+  { id:'g1s1', name:'Sidie Fofanah', group:1, correct:0, wrong:0 },
+  { id:'g1s2', name:'Peter Amara Fortune', group:1, correct:0, wrong:0 },
+  { id:'g1s3', name:'Ruth Sesay', group:1, correct:0, wrong:0 },
+  { id:'g1s4', name:'John Kargbo', group:1, correct:0, wrong:0 },
+  { id:'g1s5', name:'Mercy Bangura', group:1, correct:0, wrong:0 },
+
+  { id:'g2s1', name:'Samuel Koroma', group:2, correct:0, wrong:0 },
+  { id:'g2s2', name:'Fatmata Turay', group:2, correct:0, wrong:0 },
+  { id:'g2s3', name:'Isata Voonu', group:2, correct:0, wrong:0 }
+];
+
+/* -------------------------
+   All 200 Questions & Answers
+   (from your uploaded file)
+   ------------------------- */
+const questions = {
+  1: { q: "What is the scientific method?", a: "A systematic way of investigating problems and finding solutions through observation and experimentation." },
+  2: { q: "List the major steps involved in a scientific investigation.", a: "Observation, hypothesis, experiment, data collection, analysis, conclusion." },
+  3: { q: "Define hypothesis.", a: "A tentative explanation or prediction that can be tested." },
+  4: { q: "Why is observation important in science?", a: "It helps gather information to understand and explain phenomena." },
+  5: { q: "What is a controlled experiment?", a: "An experiment in which one variable is changed while others are kept constant." },
+  6: { q: "State two differences between a theory and a law.", a: "A theory explains; a law describes. A theory can change; a law is universal." },
+  7: { q: "What is measurement in science?", a: "Determining the size, amount, or degree of something using standard units." },
+  8: { q: "Explain the term variable.", a: "A factor that can change in an experiment." },
+  9: { q: "Give three examples of physical quantities.", a: "Length, mass, time." },
+  10:{ q: "Why are SI units important in scientific study?", a: "They provide a standard system for uniform communication and comparison." },
+
+  11:{ q:"Define matter.", a:"Anything that has mass and occupies space."},
+  12:{ q:"What are the three states of matter?", a:"Solid, liquid, gas."},
+  13:{ q:"Distinguish between solids, liquids, and gases.", a:"Solids have fixed shape and volume; liquids have fixed volume but no fixed shape; gases have neither."},
+  14:{ q:"Explain diffusion.", a:"The movement of particles from high to low concentration."},
+  15:{ q:"Example of diffusion in daily life.", a:"Smell of perfume spreading in a room."},
+  16:{ q:"Define density.", a:"Mass per unit volume."},
+  17:{ q:"Unit of density.", a:"kg/m³."},
+  18:{ q:"How does temperature affect density?", a:"Increasing temperature decreases density."},
+  19:{ q:"What is Brownian motion?", a:"Random movement of particles due to collisions."},
+  20:{ q:"What are gas laws?", a:"Laws describing the relationship between pressure, volume, and temperature of gases."},
+
+  21:{ q:"State Boyle’s law.", a:"Pressure is inversely proportional to volume at constant temperature."},
+  22:{ q:"State Charles’ law.", a:"Volume is directly proportional to temperature at constant pressure."},
+  23:{ q:"What is absolute zero?", a:"The lowest possible temperature (–273°C or 0 K)."},
+  24:{ q:"Define pressure.", a:"Force per unit area."},
+  25:{ q:"SI unit of pressure.", a:"Pascal (Pa)."},
+  26:{ q:"Why does a balloon expand when heated?", a:"Gas particles move faster and push outwards."},
+  27:{ q:"Describe particle arrangement in a solid.", a:"Closely packed and vibrate in fixed positions."},
+  28:{ q:"What is change of state?", a:"Conversion from one state of matter to another."},
+  29:{ q:"What is sublimation?", a:"Change from solid to gas without becoming liquid."},
+  30:{ q:"Examples of substances that sublime.", a:"Iodine and camphor."},
+
+  31:{ q:"Define energy.", a:"The ability to do work."},
+  32:{ q:"State the law of conservation of energy.", a:"Energy cannot be created or destroyed, only transformed."},
+  33:{ q:"List five forms of energy.", a:"Heat, light, chemical, mechanical, electrical."},
+  34:{ q:"Define potential energy.", a:"Energy possessed by a body due to its position."},
+  35:{ q:"Define kinetic energy.", a:"Energy possessed by a moving object."},
+  36:{ q:"Example of mechanical energy.", a:"A moving car."},
+  37:{ q:"What is chemical energy?", a:"Energy stored in chemical bonds."},
+  38:{ q:"What is electrical energy?", a:"Energy caused by moving electric charges."},
+  39:{ q:"Formula for work.", a:"Work = Force × Distance."},
+  40:{ q:"Define power.", a:"Rate of doing work."},
+
+  41:{ q:"Unit of energy.", a:"Joule (J)."},
+  42:{ q:"What is renewable energy?", a:"Energy that can be replaced naturally."},
+  43:{ q:"Example of renewable energy.", a:"Solar, wind, hydro."},
+  44:{ q:"What is non-renewable energy?", a:"Energy that cannot be replaced easily."},
+  45:{ q:"Example of non-renewable energy.", a:"Coal, oil, gas."},
+  46:{ q:"What is a simple machine?", a:"A device that makes work easier."},
+  47:{ q:"Formula for efficiency.", a:"Efficiency = (Useful output / Input) × 100%."},
+  48:{ q:"Examples of levers in the body.", a:"Arm and leg joints."},
+  49:{ q:"Define friction.", a:"Force opposing motion between surfaces."},
+  50:{ q:"One advantage of friction.", a:"Helps walking."},
+
+  51:{ q:"One disadvantage of friction.", a:"Causes wear and tear."},
+  52:{ q:"Define heat energy.", a:"Energy due to particle motion."},
+  53:{ q:"Define conduction.", a:"Heat transfer through solids."},
+  54:{ q:"Define convection.", a:"Heat transfer in liquids or gases."},
+  55:{ q:"Define radiation.", a:"Transfer of heat through waves without a medium."},
+
+  56:{ q:"Define force.", a:"A push or pull on an object."},
+  57:{ q:"Newton’s first law.", a:"An object stays at rest or moves uniformly unless acted upon by a force."},
+  58:{ q:"Newton’s second law.", a:"Force = mass × acceleration (F = ma)."},
+  59:{ q:"Newton’s third law.", a:"For every action, there is an equal and opposite reaction."},
+  60:{ q:"Define inertia.", a:"Resistance to change in motion."},
+  61:{ q:"Define momentum.", a:"Product of mass and velocity."},
+  62:{ q:"Define acceleration.", a:"Rate of change of velocity."},
+  63:{ q:"Define velocity.", a:"Speed in a specific direction."},
+  64:{ q:"Define speed.", a:"Rate of motion."},
+  65:{ q:"What is uniform motion?", a:"Motion at constant speed in a straight line."},
+
+  66:{ q:"Define frictional force.", a:"Resistance to motion between surfaces."},
+  67:{ q:"What is gravitational force?", a:"Force of attraction between masses."},
+  68:{ q:"Define weight.", a:"Force due to gravity on an object."},
+  69:{ q:"Define mass.", a:"Amount of matter in a body."},
+  70:{ q:"Relationship between mass and weight.", a:"Weight = Mass × Gravity (W = mg)."},
+  71:{ q:"What is centripetal force?", a:"Force keeping an object in circular motion."},
+  72:{ q:"Define terminal velocity.", a:"Constant speed reached when resistance equals force of gravity."},
+  73:{ q:"Example of balanced force.", a:"Book resting on a table."},
+  74:{ q:"Example of unbalanced force.", a:"A moving car accelerating."},
+  75:{ q:"Define torque.", a:"Turning effect of a force."},
+
+  76:{ q:"Define moment of a force.", a:"Force × perpendicular distance from pivot."},
+  77:{ q:"State principle of moments.", a:"Sum of clockwise moments = sum of anticlockwise moments at equilibrium."},
+  78:{ q:"What is equilibrium?", a:"State of balance of forces."},
+  79:{ q:"Define centre of gravity.", a:"Point where weight of a body acts."},
+  80:{ q:"Example of simple harmonic motion.", a:"A swinging pendulum."},
+
+  81:{ q:"Define electricity.", a:"Flow of electric charges."},
+  82:{ q:"What is electric current?", a:"Flow of electrons."},
+  83:{ q:"State Ohm’s Law.", a:"V = IR."},
+  84:{ q:"Define resistance.", a:"Opposition to current flow."},
+  85:{ q:"Unit of resistance.", a:"Ohm (Ω)."},
+  86:{ q:"Define voltage.", a:"Potential difference between two points."},
+  87:{ q:"What is power?", a:"Rate at which electrical energy is used."},
+  88:{ q:"Define conductor.", a:"Material that allows current to flow."},
+  89:{ q:"Define insulator.", a:"Material that does not allow current to flow."},
+  90:{ q:"What is a series circuit?", a:"Components connected end-to-end in one path."},
+
+  91:{ q:"What is a parallel circuit?", a:"Components connected in multiple paths."},
+  92:{ q:"What is a short circuit?", a:"Direct connection causing excessive current flow."},
+  93:{ q:"What is a fuse?", a:"Safety device that melts when current is too high."},
+  94:{ q:"What is a circuit breaker?", a:"Automatic switch that opens when current is excessive."},
+  95:{ q:"Define electromagnet.", a:"Temporary magnet made by passing current through a coil."},
+  96:{ q:"Uses of electromagnets.", a:"Motors, bells, cranes."},
+  97:{ q:"Define magnetic field.", a:"Region around a magnet where forces are felt."},
+  98:{ q:"How to magnetize a steel bar.", a:"Stroke with a magnet in one direction."},
+  99:{ q:"Define induced current.", a:"Current produced by changing magnetic field."},
+ 100:{ q:"Define AC.", a:"Alternating current—changes direction periodically."},
+
+ 101:{ q:"Define DC.", a:"Direct current—flows in one direction."},
+ 102:{ q:"What is an electric motor?", a:"Device that converts electrical energy to mechanical energy."},
+ 103:{ q:"What is a generator?", a:"Converts mechanical energy to electrical energy."},
+ 104:{ q:"Why is household wiring done in parallel?", a:"To ensure each device works independently."},
+ 105:{ q:"What is earthing?", a:"Connecting appliances to the ground for safety."},
+ 106:{ q:"Define static electricity.", a:"Charge at rest on an object."},
+ 107:{ q:"Effect of electric current.", a:"Heating, magnetic, or chemical effects."},
+ 108:{ q:"How does lightning occur?", a:"Discharge between clouds and earth."},
+ 109:{ q:"Define electromagnetic induction.", a:"Production of current by changing magnetic field."},
+ 110:{ q:"State Faraday’s law.", a:"Induced emf is proportional to rate of change of magnetic flux."},
+
+ 111:{ q:"Define light.", a:"Form of energy that enables vision."},
+ 112:{ q:"What is reflection?", a:"Bouncing back of light from a surface."},
+ 113:{ q:"State laws of reflection.", a:"Angle of incidence = angle of reflection; incident ray, reflected ray, and normal lie in one plane."},
+ 114:{ q:"Define refraction.", a:"Bending of light when it passes between media."},
+ 115:{ q:"State Snell’s law.", a:"n₁ sin i = n₂ sin r."},
+ 116:{ q:"Define lens.", a:"Transparent material that refracts light."},
+ 117:{ q:"Define focal length.", a:"Distance from lens to its focus."},
+ 118:{ q:"Difference between convex and concave lenses.", a:"Convex converges; concave diverges light."},
+ 119:{ q:"What is a prism?", a:"Transparent glass with triangular cross-section."},
+ 120:{ q:"Define dispersion.", a:"Splitting of light into colors."},
+
+ 121:{ q:"Speed of light in vacuum.", a:"3 × 10⁸ m/s."},
+ 122:{ q:"What is a shadow?", a:"Dark area formed when light is blocked."},
+ 123:{ q:"Define opaque, transparent, translucent.", a:"Opaque blocks light; transparent allows all; translucent allows partial."},
+ 124:{ q:"Define sound.", a:"Vibration that travels through a medium to the ear."},
+ 125:{ q:"Define frequency.", a:"Number of vibrations per second."},
+ 126:{ q:"Unit of frequency.", a:"Hertz (Hz)."},
+ 127:{ q:"Define wavelength.", a:"Distance between two successive crests or troughs."},
+ 128:{ q:"Define amplitude.", a:"Maximum displacement from rest position."},
+ 129:{ q:"Define pitch.", a:"How high or low a sound is."},
+ 130:{ q:"Define echo.", a:"Reflection of sound."},
+
+ 131:{ q:"Define resonance.", a:"Vibration at natural frequency."},
+ 132:{ q:"Define a wave.", a:"Disturbance that transfers energy."},
+ 133:{ q:"Types of waves.", a:"Transverse and longitudinal."},
+ 134:{ q:"Wave equation.", a:"v = fλ."},
+ 135:{ q:"Define interference.", a:"Combination of two or more waves."},
+ 136:{ q:"Define diffraction.", a:"Bending of waves around obstacles."},
+ 137:{ q:"Define Doppler effect.", a:"Change in pitch due to motion of source or observer."},
+ 138:{ q:"What is ultrasound?", a:"Sound above 20,000 Hz."},
+ 139:{ q:"One medical use of ultrasound.", a:"Scanning internal organs."},
+ 140:{ q:"Range of human hearing.", a:"20 Hz to 20,000 Hz."},
+
+ 141:{ q:"Define biology.", a:"Study of living things."},
+ 142:{ q:"Characteristics of living things.", a:"Movement, respiration, nutrition, growth, reproduction, excretion, sensitivity."},
+ 143:{ q:"Define cell.", a:"Basic unit of life."},
+ 144:{ q:"Parts of an animal cell.", a:"Nucleus, cytoplasm, cell membrane."},
+ 145:{ q:"Function of nucleus.", a:"Controls cell activities."},
+ 146:{ q:"Function of mitochondria.", a:"Energy production."},
+ 147:{ q:"Define photosynthesis.", a:"Process by which plants make food using sunlight."},
+ 148:{ q:"Equation for photosynthesis.", a:"CO₂ + H₂O → C₆H₁₂O₆ + O₂."},
+ 149:{ q:"Define respiration.", a:"Release of energy from food."},
+ 150:{ q:"Types of respiration.", a:"Aerobic and anaerobic."},
+
+ 151:{ q:"Define digestion.", a:"Breaking down food into simpler substances."},
+ 152:{ q:"Organs of digestion.", a:"Mouth, stomach, intestines."},
+ 153:{ q:"Define excretion.", a:"Removal of metabolic waste."},
+ 154:{ q:"Define reproduction.", a:"Production of offspring."},
+ 155:{ q:"Difference between sexual and asexual reproduction.", a:"Sexual involves gametes; asexual does not."},
+ 156:{ q:"Define pollination.", a:"Transfer of pollen to stigma."},
+ 157:{ q:"Define fertilization.", a:"Fusion of male and female gametes."},
+ 158:{ q:"Define germination.", a:"Growth of seed into a plant."},
+ 159:{ q:"Define osmosis.", a:"Movement of water through a semipermeable membrane."},
+ 160:{ q:"Define diffusion.", a:"Movement of particles from high to low concentration."},
+
+ 161:{ q:"Define transpiration.", a:"Loss of water vapor from leaves."},
+ 162:{ q:"Functions of blood.", a:"Transport, defense, regulation."},
+ 163:{ q:"Define plasma.", a:"Liquid part of blood."},
+ 164:{ q:"Define immunity.", a:"Ability to resist disease."},
+ 165:{ q:"Define pathogen.", a:"Disease-causing organism."},
+ 166:{ q:"Define hormone.", a:"Chemical messenger produced by glands."},
+ 167:{ q:"Example of human hormones.", a:"Insulin (controls blood sugar), Adrenaline (prepares body for action)."},
+ 168:{ q:"Define homeostasis.", a:"Maintenance of internal balance."},
+ 169:{ q:"Define ecosystem.", a:"Interaction of living and non-living things in an environment."},
+ 170:{ q:"Define adaptation.", a:"Feature that helps an organism survive."},
+
+ 171:{ q:"Define environment.", a:"Surroundings in which organisms live."},
+ 172:{ q:"Define renewable resources.", a:"Resources that can be replaced naturally."},
+ 173:{ q:"Define non-renewable resources.", a:"Resources that cannot be replaced easily."},
+ 174:{ q:"Define pollution.", a:"Contamination of the environment."},
+ 175:{ q:"Types of pollution.", a:"Air, water, soil, noise."},
+ 176:{ q:"Define air pollution.", a:"Contamination of air by harmful substances."},
+ 177:{ q:"Define water pollution.", a:"Contamination of water bodies."},
+ 178:{ q:"Define soil erosion.", a:"Wearing away of topsoil."},
+ 179:{ q:"Define conservation.", a:"Protection and wise use of natural resources."},
+ 180:{ q:"Define climate change.", a:"Long-term change in Earth’s climate."},
+
+ 181:{ q:"Define global warming.", a:"Increase in Earth’s average temperature."},
+ 182:{ q:"Define greenhouse effect.", a:"Trapping of heat by gases in the atmosphere."},
+ 183:{ q:"Effects of deforestation.", a:"Soil erosion and loss of habitat."},
+ 184:{ q:"Define sanitation.", a:"Measures for maintaining health and hygiene."},
+ 185:{ q:"Define hygiene.", a:"Practices that maintain cleanliness and health."},
+ 186:{ q:"Define communicable diseases.", a:"Diseases that spread from person to person."},
+ 187:{ q:"Example of communicable diseases.", a:"Malaria, measles."},
+ 188:{ q:"Define non-communicable diseases.", a:"Diseases not spread from person to person."},
+ 189:{ q:"Examples of prevention methods.", a:"Vaccination, sanitation, personal hygiene."},
+ 190:{ q:"Define first aid.", a:"Immediate care given before medical help."},
+
+ 191:{ q:"Define biotechnology.", a:"Use of living organisms to make products."},
+ 192:{ q:"Define information technology.", a:"Use of computers to store and process data."},
+ 193:{ q:"How is science used in agriculture?", a:"Improved seeds, fertilizers, pest control."},
+ 194:{ q:"How is science used in medicine?", a:"Vaccines, surgery, diagnostics."},
+ 195:{ q:"Define renewable energy technology.", a:"Technology using sources that replenish naturally."},
+ 196:{ q:"Define robotics.", a:"Use of machines that perform human-like tasks."},
+ 197:{ q:"Define space exploration.", a:"Study of outer space using technology."},
+ 198:{ q:"Define nanotechnology.", a:"Science of manipulating materials at atomic scale."},
+ 199:{ q:"Importance of scientific research.", a:"Finds solutions and improves life."},
+ 200:{ q:"How has technology improved communication?", a:"Through phones, internet, and satellites."}
+};
+
+/* -------------------------
+   UI state & helpers
+   ------------------------- */
+let selectedStudentId = null;
+const actionStack = []; // store { studentId, type, qNo }
+
+function $(sel) { return document.querySelector(sel); }
+function renderStudents(){
+  const g1 = $('#group-1'); g1.innerHTML = '';
+  const g2 = $('#group-2'); g2.innerHTML = '';
+  students.forEach(s=>{
+    const row = document.createElement('div');
+    row.className = 'student';
+    row.id = s.id;
+    row.setAttribute('role','button');
+    row.setAttribute('tabindex','0');
+    row.innerHTML = `
+      <div class="left">
+        <div class="avatar">${s.name.split(' ').map(p=>p[0]).slice(0,2).join('')}</div>
+        <div style="display:flex;flex-direction:column">
+          <div style="font-weight:800">${s.name}</div>
+          <div style="font-size:12px;color:#666">Group: ${s.group}</div>
+        </div>
+      </div>
+      <div class="counts"><span title="Correct">✔ ${s.correct}</span><span title="Wrong">✖ ${s.wrong}</span></div>
+    `;
+    row.addEventListener('click', ()=>{ selectStudent(s.id); });
+    row.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') selectStudent(s.id); });
+    if(s.group === 1) g1.appendChild(row); else g2.appendChild(row);
+  });
+  renderLiveResults();
+  renderSummary();
+}
+
+function selectStudent(id){
+  selectedStudentId = id;
+  const stud = students.find(s => s.id === id);
+  $('#selectedName').textContent = stud ? stud.name : 'None';
+  document.querySelectorAll('.student').forEach(x=>x.classList.remove('selected'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('selected');
+  // if mobile, close sidebar
+  closeSidebar();
+}
+
+function renderLiveResults(){
+  const container = $('#liveResults'); container.innerHTML = '';
+  students.forEach(s=>{
+    const d = document.createElement('div');
+    d.className = 'student-row';
+    d.innerHTML = `<div style="font-weight:800">${s.name}</div><div style="font-weight:900">✔ ${s.correct} &nbsp;&nbsp; ✖ ${s.wrong}</div>`;
+    container.appendChild(d);
+  });
+}
+
+function renderSummary(){
+  const cont = $('#summaryCards'); cont.innerHTML = '';
+  students.forEach(s=>{
+    const card = document.createElement('div'); card.className = 'card';
+    card.innerHTML = `<div style="font-weight:900">${s.name}</div>
+      <div style="margin-top:6px;font-size:13px">Group: ${s.group}</div>
+      <div style="margin-top:10px;font-size:14px"><strong>✔ ${s.correct}</strong> &nbsp;&nbsp; <strong style="color:#cc3d3d">✖ ${s.wrong}</strong></div>`;
+    cont.appendChild(card);
+  });
+}
+
+/* load question */
+function loadQuestion(n){
+  const q = questions[n];
+  if(q){
+    $('#questionText').textContent = n + '. ' + q.q;
+    $('#correctAnswer').textContent = q.a;
+    $('#loadQ').dataset.lastQ = n;
+  } else {
+    $('#questionText').textContent = 'Question #' + n + ' not found.';
+    $('#correctAnswer').textContent = '';
+    $('#loadQ').dataset.lastQ = '';
+  }
+}
+
+/* marking */
+function markAnswer(type){
+  if(!selectedStudentId){ alert('Please select a student first (tap a name on the left).'); return; }
+  const stud = students.find(s => s.id === selectedStudentId);
+  if(!stud) return;
+  const qNo = parseInt($('#loadQ').dataset.lastQ || 0, 10) || null;
+  if(type === 'correct'){ stud.correct += 1; actionStack.push({ studentId: stud.id, type: 'correct', qNo }); }
+  else { stud.wrong += 1; actionStack.push({ studentId: stud.id, type: 'wrong', qNo }); }
+  renderStudents();
+}
+
+/* undo */
+function undoLast(){
+  const last = actionStack.pop();
+  if(!last){ alert('Nothing to undo.'); return; }
+  const stud = students.find(s => s.id === last.studentId);
+  if(!stud) return;
+  if(last.type === 'correct') stud.correct = Math.max(0, stud.correct - 1);
+  else if(last.type === 'wrong') stud.wrong = Math.max(0, stud.wrong - 1);
+  renderStudents();
+  // re-select the student whose action was undone
+  selectStudent(stud.id);
+  if(last.qNo) {
+    $('#questionText').textContent += `\n\n(Undo applied for Q# ${last.qNo})`;
+  }
+}
+
+/* Sidebar open/close */
+const sidebar = $('#sidebar');
+const overlay = $('#overlay');
+function openSidebar(){
+  sidebar.classList.add('open');
+  overlay.style.display = 'block';
+  // show close button inside sidebar on mobile
+  $('#closeMenu').style.display = 'block';
+}
+function closeSidebar(){
+  sidebar.classList.remove('open');
+  overlay.style.display = 'none';
+  $('#closeMenu').style.display = 'none';
+}
+
+/* wire up controls */
+$('#menuBtn').addEventListener('click', openSidebar);
+$('#closeMenu').addEventListener('click', closeSidebar);
+overlay.addEventListener('click', closeSidebar);
+
+$('#loadQ').addEventListener('click', ()=>{
+  const n = parseInt($('#qnum').value, 10);
+  if(!n || n < 1 || n > 200){ alert('Enter a valid question number between 1 and 200.'); return; }
+  loadQuestion(n);
+});
+$('#qnum').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') $('#loadQ').click(); });
+
+$('#btnCorrect').addEventListener('click', ()=> markAnswer('correct'));
+$('#btnWrong').addEventListener('click', ()=> markAnswer('wrong'));
+$('#btnUndo').addEventListener('click', undoLast);
+
+/* initialise */
+renderStudents();
+
+/* Accessibility: close sidebar on resize if switching to desktop */
+window.addEventListener('resize', ()=>{ if(window.innerWidth > 1000) { closeSidebar(); overlay.style.display = 'none'; } });
+
+</script>
+</body>
+</html>/html>
