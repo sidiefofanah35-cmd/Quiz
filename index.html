@@ -468,27 +468,6 @@ function selectStudent(id){
   closeSidebar();
 }
 
-function renderLiveResults(){
-  const container = $('#liveResults'); container.innerHTML = '';
-  students.forEach(s=>{
-    const d = document.createElement('div');
-    d.className = 'student-row';
-    d.innerHTML = `<div style="font-weight:800">${s.name}</div><div style="font-weight:900">✔ ${s.correct} &nbsp;&nbsp; ✖ ${s.wrong}</div>`;
-    container.appendChild(d);
-  });
-}
-
-function renderSummary(){
-  const cont = $('#summaryCards'); cont.innerHTML = '';
-  students.forEach(s=>{
-    const card = document.createElement('div'); card.className = 'card';
-    card.innerHTML = `<div style="font-weight:900">${s.name}</div>
-      <div style="margin-top:6px;font-size:13px">Group: ${s.group}</div>
-      <div style="margin-top:10px;font-size:14px"><strong>✔ ${s.correct}</strong> &nbsp;&nbsp; <strong style="color:#cc3d3d">✖ ${s.wrong}</strong></div>`;
-    cont.appendChild(card);
-  });
-}
-
 /* load question */
 function loadQuestion(n){
   const q = questions[n];
